@@ -182,7 +182,7 @@ sleep 1
 
 # Restore the data to the disks
 echo -e "${YELLOW}Making swap space${NC}"
-mkswap -U `cat ${folder}/uuid-sdb3.txt | sed -n '/sdb3/s/.*UUID=\"\([^\"]*\)\".*/\1/p'` ${disk}3
+mkswap -U `cat ${folder}/uuid-sdb3.txt | sed -n '/sdb3/s/.* UUID=\"\([^\"]*\)\".*/\1/p'` ${disk}3
 echo -e "${YELLOW}Make 200GB exFat partition${NC}"
 mkfs.exfat -n EXFAT ${disk}4
 echo -e "${YELLOW}Making FAT32 partition${NC}"
