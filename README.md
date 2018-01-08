@@ -139,6 +139,8 @@ sudo umount /dev/sdb5
 ```
 
 ### Restore the data to the disks
+**NOTE:** Unless you want to change **all** references to the UUID:s that exists somewhere in the system it is safer just to make sure that the UUID is restored exactly as they were on the master disk. This has some obvious shortcoming when it comes to being able to plug in two of these disks in the same computer...
+
 ```
 sudo mkswap -U `cat uuid-sdb3.txt | sed -n '/sdb3/s/.*UUID=\"\([^\"]*\)\".*/\1/p'` /dev/sdb3
 sudo mkfs.exfat -n EXFAT /dev/sdb4
