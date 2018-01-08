@@ -216,6 +216,8 @@ resize2fs ${disk}2
 echo "Wating 1s..."
 sleep 1
 
+#WARNING!! If we change the UUID of the partitions we need not only change the fstab but grub files as well. 
+# This has not be implemented below yet so we need to live with the same 
 #echo -e "${YELLOW}Generate random UUID for swap and / ${NC}"
 #tune2fs -U random ${disk}2 
 #mkswap ${disk}3
