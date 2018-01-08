@@ -141,34 +141,44 @@ esac
 
 sgdiskfile=`ls -1 ${folder}/*.sgdisk`
 echo "Rewriting the partition table"
-sgdisk -g --load-backup=${sgdiskfile} ${disk}
+sgdiskoutputfile="/tmp/sgdiskoutput"
+rm -f ${sgdiskoutputfile}
+sgdisk -g --load-backup=${sgdiskfile} ${disk} > ${sgdiskoutputfile}
+cat ${sgdiskoutputfile}
 
-echo "Running partprobe"
-partprobe
-echo "Wating 2s..."
-sleep 2
+if grep -Fxq "Warning: The kernel is still using the old partition table." "${sgdiskoutputfile}"
+then
+	echo -e "${RED}WARNING: Kernel not aware of new partition${NC}"
+	echo "Running partprobe"
+	partprobe
 
-fdisk -l ${disk}
+	echo -e "${PURPLE}Showing current partition table${NC}"
+	fdisk -l ${disk}
 
-read -r -p "Do you want to continue? [y/N] :" response
-echo -e "${NC}"
-case "$response" in [yY][eE][sS]|[yY]) 
-   	;;
-	*)
-	echo ""
-   	echo "ABORTED script "
-   	echo ""
-   	exit
-    ;;
-esac
+	read -r -p "Do you want to continue? [y/N] :" response
+	echo -e "${NC}"
+	case "$response" in [yY][eE][sS]|[yY]) 
+   		;;
+		*)
+		echo ""
+   		echo "ABORTED script "
+   		echo ""
+   		exit
+    	;;
+	esac
+else
+	echo "Wating 1s..."
+	sleep 2
+fi
 
+echo -e "${YELLOW}Making sure partitions are unmounted${NC}"
 umount ${disk}1
 umount ${disk}2
 umount ${disk}4
 umount ${disk}5
 
-echo "Wating 2s..."
-sleep 2
+echo "Wating 1s..."
+sleep 1
 
 # Restore the data to the disks
 echo -e "${YELLOW}Making swap space${NC}"
@@ -182,25 +192,24 @@ echo -e "${YELLOW}Restore UEFI partition${NC}"
 dd if=${folder}/sdb1_${computer_type}.img of=${disk}1 bs=4096
 echo -e "${YELLOW}Restore / partition. This will take a few minutes...${NC}"
 dd if=${folder}/sdb2_${computer_type}.img of=${disk}2 bs=4096
-echo "Wating 2s..."
-sleep 2
+echo "Wating 1s..."
+sleep 1
 
 # Grow the / partition to fill the whole space
 # Warning this assumes a very specific geometry of the disk!!!!!
-
 echo -e "${YELLOW}Grow / to 200GB${NC}"
 if [[ "$computer_type" == "PC" ]]; then
 	parted ${disk} resizepart 2 420108287s
 else
 	parted ${disk} resizepart 2 420481023s
 fi
-echo "Wating 2s..."
-sleep 2
+echo "Wating 1s..."
+sleep 1
 
 echo -e "${YELLOW}Check the disk${NC}"
 e2fsck -f ${disk}2 
-echo "Wating 2s..."
-sleep 2
+echo "Wating 1s..."
+sleep 1
 
 echo -e "${YELLOW}Resize filesystem to fill partition${NC}"
 resize2fs ${disk}2 
@@ -208,8 +217,8 @@ resize2fs ${disk}2
 echo -e "${YELLOW}Generate random UUID for${NC}"
 tune2fs -U random ${disk}2 
 
-echo "Wating 2s..."
-sleep 2
+echo "Wating 1s..."
+sleep 1
 
 replace_fstab="0"
 if (( "${replace_fstab}" == "1" )); then
