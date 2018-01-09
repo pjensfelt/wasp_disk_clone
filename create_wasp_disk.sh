@@ -87,7 +87,7 @@ echo ""
 
 echo "Looking for image files..."
 for i in "1" "2"; do
-	img="${shortdisk}${i}_${computer_type}.img"
+	img="sdb${i}_${computer_type}.img"
 	if [ ! -f "$folder/$img" ]; then
 		echo -e "${RED}ERROR! Could not find file $img in source folder${NC}"
     	echo ""
